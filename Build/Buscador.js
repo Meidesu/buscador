@@ -7,6 +7,7 @@ class Buscador {
     constructor() {
         // this._termoPesquisado = termoPesquisado;
         this._indexador = new Indexador_1.Indexador();
+        this._indexador._iniciarIndexacao();
     }
     buscar(termoPesquisado) {
         this._termoPesquisado = termoPesquisado;
@@ -38,4 +39,9 @@ class Buscador {
 exports.Buscador = Buscador;
 function main() {
     const buscador = new Buscador();
+    buscador.buscar('Interestelar');
+    const termo = 'Interestelar';
+    const urlEncontradas = buscador.buscarOcorrencias(termo);
+    console.log('URLs encontradas: ', urlEncontradas);
 }
+main();

@@ -27,51 +27,64 @@ class Indexador {
             'https://meidesu.github.io/movies-pages/duna.html',
             'https://meidesu.github.io/movies-pages/blade_runner.html'
         ];
-        this._iniciarIndexacao();
+        // this._iniciarIndexacao();
     }
     _iniciarIndexacao() {
-        for (let url of this._urls) {
-            this.indexar(url);
-        }
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                for (let url of this._urls) {
+                    yield this.indexar(url);
+                }
+            }
+            catch (error) {
+                console.log(error.message);
+            }
+        });
     }
     indexar(url) {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                // Realizar a requisição GET para a URL especificada
-                const response = yield axios_1.default.get(url);
-                // Extrair os dados da resposta
-                const data = response.data;
-                // Carregar o HTML da resposta usando cheerio
-                const $ = (0, cheerio_1.load)(response.data);
-                // Obter o título da página, porem eu só quero duas palavras do título separadas por _ (underline)  
-                const titulo = $('title').text();
-                // Adicionar a URL indexada ao array de páginas indexadas, porem não pode ser repetido
-                if (!this.verificarIndexacao(url)) {
-                    this._paginasIndexadas.push(new Pagina_1.Pagina(url, data));
+            // // Adicionar a URL indexada ao array de páginas indexadas, porem não pode ser repetido
+            if (this._indexado(url)) {
+                throw new Error('URL já indexada');
+                return;
+            }
+            // Realizar a requisição GET para a URL especificada
+            const response = yield axios_1.default.get(url);
+            // Extrair os dados da resposta
+            const data = response.data;
+            // Carregar o HTML da resposta usando cheerio
+            const $ = (0, cheerio_1.load)(data);
+            // Obter o título da página, porem eu só quero duas palavras do título separadas por _ (underline)  
+            const titulo = $('title').text();
+            console.log(`Título: ${titulo}`);
+            // Obter tags <a> 
+            const tagsA = $('a');
+            // Links de cada página
+            const links = [];
+            for (let tag of tagsA) {
+                const href = $(tag).attr("href");
+                if (href) {
+                    links.push(href);
+                    console.log(`Link ${titulo}: ${href}`);
                 }
-                this._salvarArquivo(titulo, data);
-                console.log('Título:', titulo);
             }
-            catch (error) {
-                // Tratar erros caso a requisição falhe
-                console.error('Ocorreu um erro ao indexar');
-            }
-            //sei la
+            this._paginasIndexadas.push(new Pagina_1.Pagina(url, data, links));
+            // console.log(this._paginasIndexadas.length);
+            this._salvarArquivo(titulo, data);
+            console.log(`${titulo} indexado com sucesso`);
         });
     }
     _salvarArquivo(titulo, data) {
         let _nomeArquivo = titulo.split(' ').slice(0, 2).join('_');
         try {
             fs_1.default.writeFileSync(`../Pages/${_nomeArquivo}.html`, data);
-            //Pages
         }
         catch (error) {
-            // console.error('Erro ao salvar o arquivo');
-            console.log(error);
+            throw new Error('Erro ao salvar o arquivo');
         }
     }
     // Metodo que verifica se a URL já foi indexada
-    verificarIndexacao(url) {
+    _indexado(url) {
         for (let pagina of this._paginasIndexadas) {
             if (pagina.url === url) {
                 return true;
@@ -86,7 +99,7 @@ class Indexador {
 exports.Indexador = Indexador;
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const indexador = new Indexador();
+        // const indexador = new Indexador();
         // await indexador.indexar('https://meidesu.github.io/movies-pages/interestelar.html');
         // await indexador.indexar('https://meidesu.github.io/movies-pages/mochileiro.html');
         // await indexador.indexar('https://meidesu.github.io/movies-pages/matrix.html');
@@ -94,5 +107,5 @@ function main() {
         // await indexador.indexar('https://meidesu.github.io/movies-pages/blade_runner.html');
     });
 }
-// crie testes para 5 sites
+// crie testes para 5 site
 main();

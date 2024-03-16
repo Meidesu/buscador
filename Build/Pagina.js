@@ -2,7 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Pagina = void 0;
 class Pagina {
-    constructor(url, conteudo, autoridade = 0) {
+    constructor(url, conteudo, links, autoridade = 0) {
+        this._links = [];
         this._url = url;
         this._conteudo = conteudo;
         this._autoridade = autoridade;

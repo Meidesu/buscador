@@ -3,8 +3,9 @@ export class Pagina {
     private _url: string;
     private _conteudo: string;
     private _autoridade: number;
+    private _links: string[] = [];
 
-    constructor(url: string, conteudo: string, autoridade: number = 0) {
+    constructor(url: string, conteudo: string, links: string[], autoridade: number = 0) {
         this._url = url;
         this._conteudo = conteudo;
         this._autoridade = autoridade;
