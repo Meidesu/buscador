@@ -1,4 +1,3 @@
-// só continuar aqui fds
 export class Pagina {
     //url: string, conteudo: string, autoridade: number 
     private _url: string;

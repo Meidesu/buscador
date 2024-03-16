@@ -1,13 +1,30 @@
 import axios from 'axios';
 import cheerio, { load } from 'cheerio';
 import fs from 'fs';
+import { Pagina } from './Pagina';
 
-class Indexador{
-    private _paginasIndexadas: string[];
+export class Indexador{
+    private _paginasIndexadas: Pagina[];
+    private _urls: string[];
     
     constructor(){
         this._paginasIndexadas = [];
+        this._urls = [
+            'https://meidesu.github.io/movies-pages/interestelar.html',
+            'https://meidesu.github.io/movies-pages/mochileiro.html',
+            'https://meidesu.github.io/movies-pages/matrix.html',
+            'https://meidesu.github.io/movies-pages/duna.html',
+            'https://meidesu.github.io/movies-pages/blade_runner.html'
+        ];
+
+        this._iniciarIndexacao();
     }
+
+    private _iniciarIndexacao(): void{
+        for (let url of this._urls){
+            this.indexar(url);
+        }
+    } 
 
     public async indexar(url: string): Promise<void>{
         try {
@@ -25,12 +42,11 @@ class Indexador{
 
             // Adicionar a URL indexada ao array de páginas indexadas, porem não pode ser repetido
             if(!this.verificarIndexacao(url)){
-                this._paginasIndexadas.push(url);
+                this._paginasIndexadas.push(new Pagina(url, data));
             }
 
             this._salvarArquivo(titulo, data);
 
-            // BOTEO PRA ELE PODER EDITAR NO TERMINAL
             console.log('Título:', titulo);
 
         } catch (error) {
@@ -56,12 +72,18 @@ class Indexador{
 
     // Metodo que verifica se a URL já foi indexada
     public verificarIndexacao(url: string): boolean{
-        return this._paginasIndexadas.includes(url);
+        for (let pagina of this._paginasIndexadas){
+            if(pagina.url === url){
+                return true;
+            }
+        }
+        
+        return false;
     }
 
 
 
-    public get indice(): string[]{
+    public get paginasIndexadas(): Pagina[]{
         return this._paginasIndexadas;
     }    
 }
@@ -69,11 +91,11 @@ class Indexador{
 async function main(){
     const indexador = new Indexador();
     
-    await indexador.indexar('https://meidesu.github.io/movies-pages/interestelar.html');
-    await indexador.indexar('https://meidesu.github.io/movies-pages/mochileiro.html');
-    await indexador.indexar('https://meidesu.github.io/movies-pages/matrix.html');
-    await indexador.indexar('https://meidesu.github.io/movies-pages/duna.html');
-    await indexador.indexar('https://meidesu.github.io/movies-pages/blade_runner.html');
+        // await indexador.indexar('https://meidesu.github.io/movies-pages/interestelar.html');
+        // await indexador.indexar('https://meidesu.github.io/movies-pages/mochileiro.html');
+        // await indexador.indexar('https://meidesu.github.io/movies-pages/matrix.html');
+        // await indexador.indexar('https://meidesu.github.io/movies-pages/duna.html');
+        // await indexador.indexar('https://meidesu.github.io/movies-pages/blade_runner.html');
 
 }
 // crie testes para 5 sites

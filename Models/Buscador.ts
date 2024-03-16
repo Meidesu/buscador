@@ -1,34 +1,45 @@
 import {load} from 'cheerio';
 import {Pagina} from './Pagina';
+import { Indexador } from './Indexador';
 
 
-class Buscador {
-    private paginasIndexadas: Pagina[];// ok
+export class Buscador {
+
+    private _termoPesquisado!: string;
+    private _indexador: Indexador;
 
     constructor() {
-        this.paginasIndexadas = []
+        // this._termoPesquisado = termoPesquisado;
+        this._indexador = new Indexador();
     }
 
-    adicionarPagina(url: string, conteudo: string): void {
+    buscar(termoPesquisado: string): void {
+        this._termoPesquisado = termoPesquisado;
 
-        this.paginasIndexadas.push(new Pagina(url, conteudo));
+        // TODO: metodos de para calcular a autoridade das paginas
+        
+        // retornar as paginas hierarquizadas por autoridade
     }
+
+    // adicionarPagina(url: string, conteudo: string): void {
+
+    //     this.paginasIndexadas.push(new Pagina(url, conteudo));
+    // }
 
     incrementarAutoridade(url: string, acumulado: number): void {
-        const pagina = this.paginasIndexadas.find(p => p.url === url)
+        const pagina = this._indexador.paginasIndexadas.find(p => p.url === url);
+
         if (pagina) {
             pagina.autoridade += acumulado;
-        }
+        } 
     }
 
-    buscar(consulta: string): string[] {
+    buscarOcorrencias(consulta: string): string[] {
         const resultados: string[] = [];
 
-        for (const pagina of this.paginasIndexadas) {
+        for (const pagina of this._indexador.paginasIndexadas) {
             const $ = load(pagina.conteudo);
-            
-
-            // não entendeu?
+        
             const ocorrencias = $('*').text().split(consulta.toLowerCase()).length - 1;
 
             if (ocorrencias > 0) {
@@ -38,8 +49,9 @@ class Buscador {
         }
 
         return resultados;
-
-        // o que exatamente ela retorna?
-        
     }
 }    
+
+function main() {
+    const buscador = new Buscador();
+}

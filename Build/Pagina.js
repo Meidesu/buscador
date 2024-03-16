@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Pagina = void 0;
-// só continuar aqui fds
 class Pagina {
     constructor(url, conteudo, autoridade = 0) {
         this._url = url;
