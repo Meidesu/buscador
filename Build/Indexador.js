@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const cheerio_1 = require("cheerio");
+const fs_1 = __importDefault(require("fs"));
 class Indexador {
     constructor() {
         this._paginasIndexadas = [];
@@ -34,16 +35,26 @@ class Indexador {
                     this._paginasIndexadas.push(url);
                 }
                 this._salvarArquivo(titulo, data);
-                // Exemplo de como utilizar o título (imprimir no console)
+                // BOTEO PRA ELE PODER EDITAR NO TERMINAL
                 console.log('Título:', titulo);
             }
             catch (error) {
                 // Tratar erros caso a requisição falhe
                 console.error('Ocorreu um erro ao indexar');
             }
+            //sei la
         });
     }
     _salvarArquivo(titulo, data) {
+        let _nomeArquivo = titulo.split(' ').slice(0, 2).join('_');
+        try {
+            fs_1.default.writeFileSync(`../Pages/${_nomeArquivo}.html`, data);
+            //Pages
+        }
+        catch (error) {
+            // console.error('Erro ao salvar o arquivo');
+            console.log(error);
+        }
     }
     // Metodo que verifica se a URL já foi indexada
     verificarIndexacao(url) {
@@ -53,13 +64,15 @@ class Indexador {
         return this._paginasIndexadas;
     }
 }
-// async function main(){
-//     const indexador = new Indexador();
-//     await indexador.indexar('https://meidesu.github.io/movies-pages/interestelar.html');
-//     await indexador.indexar('https://meidesu.github.io/movies-pages/mochileiro.html');
-//     await indexador.indexar('https://meidesu.github.io/movies-pages/matrix.html');
-//     await indexador.indexar('https://meidesu.github.io/movies-pages/duna.html');
-//     await indexador.indexar('https://meidesu.github.io/movies-pages/blade_runner.html');
-// }
-// // crie testes para 5 sites
-// main();
+function main() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const indexador = new Indexador();
+        yield indexador.indexar('https://meidesu.github.io/movies-pages/interestelar.html');
+        yield indexador.indexar('https://meidesu.github.io/movies-pages/mochileiro.html');
+        yield indexador.indexar('https://meidesu.github.io/movies-pages/matrix.html');
+        yield indexador.indexar('https://meidesu.github.io/movies-pages/duna.html');
+        yield indexador.indexar('https://meidesu.github.io/movies-pages/blade_runner.html');
+    });
+}
+// crie testes para 5 sites
+main();
