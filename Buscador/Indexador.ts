@@ -1,5 +1,6 @@
 import axios from 'axios';
 import cheerio, { load } from 'cheerio';
+import fs from 'fs';
 
 class Indexador{
     private _paginasIndexadas: string[];
@@ -14,7 +15,7 @@ class Indexador{
             const response = await axios.get(url);
     
             // Extrair os dados da resposta
-            const data = response.data;
+            const data: string = response.data;
     
             // Carregar o HTML da resposta usando cheerio
             const $ = load(response.data);
@@ -27,12 +28,19 @@ class Indexador{
                 this._paginasIndexadas.push(url);
             }
 
+            this._salvarArquivo(titulo, data);
+
             // Exemplo de como utilizar o título (imprimir no console)
             console.log('Título:', titulo);
         } catch (error) {
             // Tratar erros caso a requisição falhe
-            console.error('Ocorreu um erro ao indexar:');
+            console.error('Ocorreu um erro ao indexar');
         }
+        
+    }
+
+    private _salvarArquivo(titulo: string, data: string) {
+         
         
     }
 
@@ -41,21 +49,23 @@ class Indexador{
         return this._paginasIndexadas.includes(url);
     }
 
+
+
     public get indice(): string[]{
         return this._paginasIndexadas;
     }    
 }
 
-async function main(){
-    const indexador = new Indexador();
+// async function main(){
+//     const indexador = new Indexador();
     
-    await indexador.indexar('https://meidesu.github.io/movies-pages/interestelar.html');
-    await indexador.indexar('https://meidesu.github.io/movies-pages/mochileiro.html');
-    await indexador.indexar('https://meidesu.github.io/movies-pages/matrix.html');
-    await indexador.indexar('https://meidesu.github.io/movies-pages/duna.html');
-    await indexador.indexar('https://meidesu.github.io/movies-pages/blade_runner.html');
+//     await indexador.indexar('https://meidesu.github.io/movies-pages/interestelar.html');
+//     await indexador.indexar('https://meidesu.github.io/movies-pages/mochileiro.html');
+//     await indexador.indexar('https://meidesu.github.io/movies-pages/matrix.html');
+//     await indexador.indexar('https://meidesu.github.io/movies-pages/duna.html');
+//     await indexador.indexar('https://meidesu.github.io/movies-pages/blade_runner.html');
 
-}
-// crie testes para 5 sites
+// }
+// // crie testes para 5 sites
 
-main();
+// main();
