@@ -4,20 +4,21 @@ import { Indexador } from './Indexador';
 
 
 export class Buscador {
-
-    private _termoPesquisado!: string;
-    private _indexador: Indexador;
+    public _indexador: Indexador;
+    public _paginasRetorno: Pagina[] = [];
 
     constructor() {
-        // this._termoPesquisado = termoPesquisado;
         this._indexador = new Indexador();
-        
-        this._indexador._iniciarIndexacao()
+    }
+
+    public async InicarBuscador(): Promise<void> {
+        await this._indexador._iniciarIndexacao();
+
+        // this._calcularReferencias();
         
     }
 
-    buscar(termoPesquisado: string): void {
-        this._termoPesquisado = termoPesquisado;
+    public async buscar(termoPesquisado: string): Promise<void> {
 
         // TODO: metodos de para calcular a autoridade das paginas
         
@@ -29,39 +30,63 @@ export class Buscador {
     //     this.paginasIndexadas.push(new Pagina(url, conteudo));
     // }
 
-    incrementarAutoridade(url: string, acumulado: number): void {
-        const pagina = this._indexador.paginasIndexadas.find(p => p.url === url);
-
+    incrementarAutoridade(pagina: Pagina, acumulado: number): void {
         if (pagina) {
             pagina.autoridade += acumulado;
         } 
     }
 
-    buscarOcorrencias(consulta: string): string[] {
-        const resultados: string[] = [];
+    buscarOcorrencias(consulta: string): void {
 
         for (const pagina of this._indexador.paginasIndexadas) {
             const $ = load(pagina.conteudo);
-        
-            const ocorrencias = $('*').text().split(consulta.toLowerCase()).length - 1;
 
-            if (ocorrencias > 0) {
-                resultados.push(pagina.url);
-                pagina.autoridade += ocorrencias * 5;
+            const regex = new RegExp('\\b' + consulta + '\\b', 'gi');
+
+            const resHead = $('head').html();
+            const resBody = $('body').text();
+
+            if (resBody && resHead) {
+                const ocorrenciasHead = (resHead.match(regex) || []).length;
+                const ocorrenciasBody = (resBody.match(regex) || []).length;
+
+                this.incrementarAutoridade(pagina, (ocorrenciasHead + ocorrenciasBody) * 5);
             }
         }
-
-        return resultados;
     }
-}    
 
-function main() {
-    const buscador: Buscador = new Buscador()
+    private _calcularReferencias(): void {
+        for (let pagina of this._indexador.paginasIndexadas) {
+            
+            for (let link of pagina.links) {
 
-    buscador.buscar('Interestelar')
-    const termo: string = 'Interestelar'
-    const urlEncontradas: string[] = buscador.buscarOcorrencias(termo)
-    console.log('URLs encontradas: ', urlEncontradas)
+                let paginaReferenciada = this._indexador.paginasIndexadas.find(p => p.url === link);
+
+                if (paginaReferenciada) {
+                    if (paginaReferenciada.url == pagina.url){
+                        
+                        paginaReferenciada.autoridade -= 20;
+                    }else{
+                        
+                        paginaReferenciada.autoridade += 20;
+                    }
+                }
+            }
+        }
+    }
+}
+
+async function main() {
+    const buscador: Buscador = new Buscador();
+
+    await buscador.InicarBuscador();
+    buscador.buscarOcorrencias('Matrix');
+    
+    buscador._indexador.paginasIndexadas.forEach(p => console.log(p.titulo, p.autoridade));
+
+    // const termo: string = 'Interestelar'
+    // const urlEncontradas: string[] = buscador.buscarOcorrencias(termo)
+    // console.log('URLs encontradas: ', urlEncontradas)
 }
 
 main()

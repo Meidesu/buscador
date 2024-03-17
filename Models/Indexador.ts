@@ -1,14 +1,14 @@
 import axios from 'axios';
 import cheerio, { load } from 'cheerio';
-import fs from 'fs';
+import fs, { link } from 'fs';
 import { Pagina } from './Pagina';
-import { log } from 'console';
 
 export class Indexador{
     private _paginasIndexadas: Pagina[];
     private _urls: string[];
+    private _index: string;
     
-    constructor(){
+    constructor(index?: string){
         this._paginasIndexadas = [];
         this._urls = [
             'https://meidesu.github.io/movies-pages/interestelar.html',
@@ -18,27 +18,21 @@ export class Indexador{
             'https://meidesu.github.io/movies-pages/blade_runner.html'
         ];
 
-        // this._iniciarIndexacao();
+        this._index = index || 'https://meidesu.github.io/movies-pages/interestelar.html';
     }
 
     public async _iniciarIndexacao(): Promise<void>{
-
-        try{
-            for (let url of this._urls){
-                await this.indexar(url);
-            }
-        } catch (error: any) {
-            console.log(error.message);
-        }
+        await this.indexar(this._index);
+        console.log('Indexação concluída');
+        
     }
 
     public async indexar(url: string): Promise<void>{
-        
-        // // Adicionar a URL indexada ao array de páginas indexadas, porem não pode ser repetido
         if(this._indexado(url)){
-            throw new Error('URL já indexada');
+            // throw new Error('URL já indexada');
+            console.log('URL já indexada');
             return;
-        }
+        }       
 
         // Realizar a requisição GET para a URL especificada
         
@@ -55,30 +49,34 @@ export class Indexador{
         
         console.log(`Título: ${titulo}`);
         
-        
         // Obter tags <a> 
         const tagsA = $('a');
         
         // Links de cada página
         const links: string[] = [];
         
+        // Adicionar os links ao array de links
         for ( let tag of tagsA){
             const href = $(tag).attr("href");
 
             if(href){
+
                 links.push(href);
-                console.log(`Link ${titulo}: ${href}`);
-                
             }
         }
 
-        this._paginasIndexadas.push(new Pagina(url, data, links));
-        
-        // console.log(this._paginasIndexadas.length);
+        this._paginasIndexadas.push(new Pagina(titulo, url, data, links));
         
         this._salvarArquivo(titulo, data);
 
-        console.log(`${titulo} indexado com sucesso`);
+        for (let link of links){
+            if(this._indexado(link)){
+                
+                continue;
+            }
+
+            await this.indexar(link);
+        }        
     }
 
     private _salvarArquivo(titulo: string, data: string) {
