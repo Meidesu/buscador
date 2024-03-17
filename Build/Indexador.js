@@ -45,12 +45,27 @@ class Indexador {
             // Realizar a requisição GET para a URL especificada
             const response = yield axios_1.default.get(url);
             // Extrair os dados da resposta
-            const data = response.data;
+            const conteudo = response.data;
             // Carregar o HTML da resposta usando cheerio
-            const $ = (0, cheerio_1.load)(data);
+            const $ = (0, cheerio_1.load)(conteudo);
             // Obter o título da página, porem eu só quero duas palavras do título separadas por _ (underline)  
             const titulo = $('title').text();
             console.log(`Título: ${titulo}`);
+            // Extrai a data da pagna e transforma num tipo date
+            const emElement = $('p').text();
+            const regex = /\d{2}\/\d{2}\/\d{4}/;
+            const match = emElement.match(regex);
+            const dataPag = match ? match[0] : null;
+            console.log(`Data: ${dataPag}`);
+            let data;
+            if (dataPag) {
+                const [dia, mes, ano] = dataPag.split('/').map(Number);
+                data = new Date(ano, mes - 1, dia);
+            }
+            else {
+                data = null;
+            }
+            console.log(`Data final: ${data}`);
             // Obter tags <a> 
             const tagsA = $('a');
             // Links de cada página
@@ -62,8 +77,8 @@ class Indexador {
                     links.push(href);
                 }
             }
-            this._paginasIndexadas.push(new Pagina_1.Pagina(titulo, url, data, links));
-            this._salvarArquivo(titulo, data);
+            this._paginasIndexadas.push(new Pagina_1.Pagina(titulo, url, conteudo, data, links));
+            this._salvarArquivo(titulo, conteudo);
             for (let link of links) {
                 if (this._indexado(link)) {
                     continue;
@@ -72,10 +87,10 @@ class Indexador {
             }
         });
     }
-    _salvarArquivo(titulo, data) {
+    _salvarArquivo(titulo, conteudo) {
         let _nomeArquivo = titulo.split(' ').slice(0, 2).join('_');
         try {
-            fs_1.default.writeFileSync(`../Pages/${_nomeArquivo}.html`, data);
+            fs_1.default.writeFileSync(`../Pages/${_nomeArquivo}.html`, conteudo);
         }
         catch (error) {
             throw new Error('Erro ao salvar o arquivo');

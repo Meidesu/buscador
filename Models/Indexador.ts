@@ -39,19 +39,40 @@ export class Indexador{
         const response = await axios.get(url);
         
         // Extrair os dados da resposta
-        const data: string = response.data;
+        const conteudo: string = response.data;
         
         // Carregar o HTML da resposta usando cheerio
-        const $ = load(data);
+        const $ = load(conteudo);
         
         // Obter o título da página, porem eu só quero duas palavras do título separadas por _ (underline)  
         const titulo = $('title').text();
         
         console.log(`Título: ${titulo}`);
+
+        // Extrai a data da pagna e transforma num tipo date
+        const emElement = $('p').text();
+        const regex = /\d{2}\/\d{2}\/\d{4}/;
+
+        const match = emElement.match(regex);
+        const dataPag = match ? match[0] : null;
+
+        console.log(`Data: ${dataPag}`);
+
+        let data: Date | null;
         
+        if(dataPag){
+            const [dia, mes, ano] = dataPag.split('/').map(Number);
+            data = new Date(ano, mes - 1, dia);
+        } else {
+            data = null;
+        }
+
+        console.log(`Data final: ${data}`);
+        
+
         // Obter tags <a> 
         const tagsA = $('a');
-        
+
         // Links de cada página
         const links: string[] = [];
         
@@ -65,9 +86,9 @@ export class Indexador{
             }
         }
 
-        this._paginasIndexadas.push(new Pagina(titulo, url, data, links));
+        this._paginasIndexadas.push(new Pagina(titulo, url, conteudo, data, links));
         
-        this._salvarArquivo(titulo, data);
+        this._salvarArquivo(titulo, conteudo);
 
         for (let link of links){
             if(this._indexado(link)){
@@ -79,11 +100,11 @@ export class Indexador{
         }        
     }
 
-    private _salvarArquivo(titulo: string, data: string) {
+    private _salvarArquivo(titulo: string, conteudo: string) {
         let _nomeArquivo: string = titulo.split(' ').slice(0, 2).join('_');
         
         try{
-            fs.writeFileSync(`../Pages/${_nomeArquivo}.html`, data);
+            fs.writeFileSync(`../Pages/${_nomeArquivo}.html`, conteudo);
         } catch (error) {
             throw new Error('Erro ao salvar o arquivo');
         }
@@ -100,8 +121,6 @@ export class Indexador{
         
         return false;
     }
-
-
 
     public get paginasIndexadas(): Pagina[]{
         return this._paginasIndexadas;

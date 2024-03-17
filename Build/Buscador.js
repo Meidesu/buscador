@@ -20,7 +20,8 @@ class Buscador {
     InicarBuscador() {
         return __awaiter(this, void 0, void 0, function* () {
             yield this._indexador._iniciarIndexacao();
-            // this._calcularReferencias();
+            this._calcularReferencias();
+            this._calcularFrescor();
         });
     }
     buscar(termoPesquisado) {
@@ -32,21 +33,62 @@ class Buscador {
     // adicionarPagina(url: string, conteudo: string): void {
     //     this.paginasIndexadas.push(new Pagina(url, conteudo));
     // }
-    incrementarAutoridade(pagina, acumulado) {
-        if (pagina) {
-            pagina.autoridade += acumulado;
-        }
-    }
+    // incrementarAutoridade(pagina: Pagina, acumulado: number): void {
+    //     if (pagina) {
+    //         pagina.autoridade += acumulado;
+    //     } 
+    // }
+    // buscarOcorrencias(consulta: string): void {
+    //     for (const pagina of this._indexador.paginasIndexadas) {
+    //         const $ = load(pagina.conteudo);
+    //         const regex = new RegExp('\\b' + consulta + '\\b', 'gi');
+    //         const resHead = $('head').html();
+    //         const resBody = $('body').text();
+    //         if (resBody && resHead) {
+    //             const ocorrenciasHead = (resHead.match(regex) || []).length;
+    //             const ocorrenciasBody = (resBody.match(regex) || []).length;
+    //             this.incrementarAutoridade(pagina, (ocorrenciasHead + ocorrenciasBody) * 5);
+    //         }
+    //     }
+    // }
     buscarOcorrencias(consulta) {
         for (const pagina of this._indexador.paginasIndexadas) {
             const $ = (0, cheerio_1.load)(pagina.conteudo);
             const regex = new RegExp('\\b' + consulta + '\\b', 'gi');
             const resHead = $('head').html();
             const resBody = $('body').text();
-            if (resBody && resHead) {
-                const ocorrenciasHead = (resHead.match(regex) || []).length;
-                const ocorrenciasBody = (resBody.match(regex) || []).length;
-                this.incrementarAutoridade(pagina, (ocorrenciasHead + ocorrenciasBody) * 5);
+            let _usotags = pagina.pontuacao.usoTags;
+            let _ocorr = 0;
+            if (resHead) {
+                _ocorr += (resHead.match(regex) || []).length;
+                _usotags += (resHead.match(regex) || []).length * 20;
+            }
+            if (resBody) {
+                $('h1').each((index, element) => {
+                    const h1Text = $(element).text();
+                    _usotags += (h1Text.match(regex) || []).length * 15;
+                    _ocorr += (h1Text.match(regex) || []).length;
+                });
+                $('h2').each((index, element) => {
+                    const h2Text = $(element).text();
+                    _usotags += (h2Text.match(regex) || []).length * 10;
+                    _ocorr += (h2Text.match(regex) || []).length;
+                });
+                $('p').each((index, element) => {
+                    const pText = $(element).text();
+                    _usotags += (pText.match(regex) || []).length * 5;
+                    _ocorr += (pText.match(regex) || []).length;
+                });
+                $('a').each((index, element) => {
+                    const aText = $(element).text();
+                    _usotags += (aText.match(regex) || []).length * 2;
+                    _ocorr += (aText.match(regex) || []).length;
+                });
+            }
+            pagina.pontuacao.usoTags = _usotags;
+            pagina.pontuacao.freqTermo = _ocorr * 5;
+            if (_ocorr > 0) {
+                this._paginasRetorno.push(pagina);
             }
         }
     }
@@ -56,13 +98,30 @@ class Buscador {
                 let paginaReferenciada = this._indexador.paginasIndexadas.find(p => p.url === link);
                 if (paginaReferenciada) {
                     if (paginaReferenciada.url == pagina.url) {
-                        paginaReferenciada.autoridade -= 20;
+                        paginaReferenciada.pontuacao.autoReferencia += 20;
                     }
                     else {
-                        paginaReferenciada.autoridade += 20;
+                        paginaReferenciada.pontuacao.referencia += 20;
                     }
                 }
             }
+        }
+    }
+    _calcularFrescor() {
+        for (let pagina of this._indexador.paginasIndexadas) {
+            let data = new Date();
+            let dataPagina = pagina.data;
+            let pontuacao = 30;
+            console.log(data);
+            console.log(dataPagina);
+            // Se a pagina não tiver data, não será calculado o frescor
+            if (!dataPagina) {
+                continue;
+            }
+            let diferenca = data.getFullYear() - dataPagina.getFullYear();
+            console.log('Diferença: ', diferenca);
+            pontuacao -= diferenca * 5;
+            pagina.pontuacao.frescor = pontuacao;
         }
     }
 }
@@ -72,7 +131,7 @@ function main() {
         const buscador = new Buscador();
         yield buscador.InicarBuscador();
         buscador.buscarOcorrencias('Matrix');
-        buscador._indexador.paginasIndexadas.forEach(p => console.log(p.titulo, p.autoridade));
+        buscador._indexador.paginasIndexadas.forEach(p => console.log(p.titulo, p.pontuacao));
         // const termo: string = 'Interestelar'
         // const urlEncontradas: string[] = buscador.buscarOcorrencias(termo)
         // console.log('URLs encontradas: ', urlEncontradas)
