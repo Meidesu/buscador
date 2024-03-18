@@ -1,8 +1,6 @@
 import {load} from 'cheerio';
 import {Pagina} from './Pagina';
 import { Indexador } from './Indexador';
-import { log } from 'console';
-
 
 export class Buscador {
     public _indexador: Indexador;
@@ -20,42 +18,11 @@ export class Buscador {
         
     }
 
-    public async buscar(termoPesquisado: string): Promise<void> {
+    public buscar(termoPesquisado: string): Pagina[] {
+        this.buscarOcorrencias(termoPesquisado);
 
-        // TODO: metodos de para calcular a autoridade das paginas
-        
-        // retornar as paginas hierarquizadas por autoridade
+        return this._paginasRetorno;
     }
-
-    // adicionarPagina(url: string, conteudo: string): void {
-
-    //     this.paginasIndexadas.push(new Pagina(url, conteudo));
-    // }
-
-    // incrementarAutoridade(pagina: Pagina, acumulado: number): void {
-    //     if (pagina) {
-    //         pagina.autoridade += acumulado;
-    //     } 
-    // }
-
-    // buscarOcorrencias(consulta: string): void {
-
-    //     for (const pagina of this._indexador.paginasIndexadas) {
-    //         const $ = load(pagina.conteudo);
-
-    //         const regex = new RegExp('\\b' + consulta + '\\b', 'gi');
-
-    //         const resHead = $('head').html();
-    //         const resBody = $('body').text();
-
-    //         if (resBody && resHead) {
-    //             const ocorrenciasHead = (resHead.match(regex) || []).length;
-    //             const ocorrenciasBody = (resBody.match(regex) || []).length;
-
-    //             this.incrementarAutoridade(pagina, (ocorrenciasHead + ocorrenciasBody) * 5);
-    //         }
-    //     }
-    // }
 
     buscarOcorrencias(consulta: string): void {
         for (const pagina of this._indexador.paginasIndexadas) {
@@ -137,18 +104,17 @@ export class Buscador {
             let dataPagina = pagina.data;
             let pontuacao = 30;
 
-            console.log(data);
-            console.log(dataPagina);
+            // console.log(data);
+            // console.log(dataPagina);
             
             // Se a pagina não tiver data, não será calculado o frescor
             if (!dataPagina) {
                 continue;
             }
 
-
             let diferenca = data.getFullYear() - dataPagina.getFullYear();
 
-            console.log('Diferença: ', diferenca);
+            // console.log('Diferença: ', diferenca);
 
             pontuacao -= diferenca * 5;
             pagina.pontuacao.frescor = pontuacao;
@@ -156,17 +122,14 @@ export class Buscador {
     }
 }
 
-async function main() {
-    const buscador: Buscador = new Buscador();
+// async function main() {
+//     const buscador: Buscador = new Buscador();
 
-    await buscador.InicarBuscador();
-    buscador.buscarOcorrencias('Matrix');
+//     await buscador.InicarBuscador();
+
+//     buscador.buscarOcorrencias('Matrix');
     
-    buscador._indexador.paginasIndexadas.forEach(p => console.log(p.titulo, p.pontuacao));
+//     buscador._indexador.paginasIndexadas.forEach(p => console.log(p.titulo, p.pontuacao));
+// }
 
-    // const termo: string = 'Interestelar'
-    // const urlEncontradas: string[] = buscador.buscarOcorrencias(termo)
-    // console.log('URLs encontradas: ', urlEncontradas)
-}
-
-main()
+// main()

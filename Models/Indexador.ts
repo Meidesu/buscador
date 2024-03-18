@@ -1,6 +1,6 @@
 import axios from 'axios';
-import cheerio, { load } from 'cheerio';
-import fs, { link } from 'fs';
+import { load } from 'cheerio';
+import fs from 'fs';
 import { Pagina } from './Pagina';
 
 export class Indexador{
@@ -46,8 +46,6 @@ export class Indexador{
         
         // Obter o título da página, porem eu só quero duas palavras do título separadas por _ (underline)  
         const titulo = $('title').text();
-        
-        console.log(`Título: ${titulo}`);
 
         // Extrai a data da pagna e transforma num tipo date
         const emElement = $('p').text();
@@ -56,8 +54,6 @@ export class Indexador{
         const match = emElement.match(regex);
         const dataPag = match ? match[0] : null;
 
-        console.log(`Data: ${dataPag}`);
-
         let data: Date | null;
         
         if(dataPag){
@@ -65,10 +61,7 @@ export class Indexador{
             data = new Date(ano, mes - 1, dia);
         } else {
             data = null;
-        }
-
-        console.log(`Data final: ${data}`);
-        
+        }        
 
         // Obter tags <a> 
         const tagsA = $('a');
@@ -126,17 +119,3 @@ export class Indexador{
         return this._paginasIndexadas;
     }    
 }
-
-async function main(){
-    // const indexador = new Indexador();
-    
-    // await indexador.indexar('https://meidesu.github.io/movies-pages/interestelar.html');
-    // await indexador.indexar('https://meidesu.github.io/movies-pages/mochileiro.html');
-    // await indexador.indexar('https://meidesu.github.io/movies-pages/matrix.html');
-    // await indexador.indexar('https://meidesu.github.io/movies-pages/duna.html');
-    // await indexador.indexar('https://meidesu.github.io/movies-pages/blade_runner.html');
-
-}
-// crie testes para 5 site
-
-main();
