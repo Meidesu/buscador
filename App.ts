@@ -1,21 +1,13 @@
 import { terminal } from "terminal-kit";
 import { Buscador } from "./Models/Buscador";
 import { Pagina } from "./Models/Pagina";
-import { Indexador } from "./Models/Indexador";
 import { MyTerminal } from "./Utils/MyTerminal";
-import { question } from "readline-sync";
 import { ioutils } from "./Utils/io_utils";
-// import  from "terminal-kit";
-// import { terminal as Terminal } from "terminal-kit";
-// import T from "terminal-kit";
-// import { singleColumnMenu } from "terminal-kit";
-// import { grabInput } from "terminal-kit";
 
 export class App {
     public buscador: Buscador;
     private menuOptions = ["Opção 1", "Opção 2", "Opção 3", "Sair"];
-    // private terminal = Terminal;
-
+ 
     constructor() {
         this.buscador = new Buscador();
     }
@@ -23,23 +15,16 @@ export class App {
     public async main(): Promise<void> {
         await this.buscador.InicarBuscador();
 
-        
-
         MyTerminal.exit();
         terminal.clear();
         this.menu();
-        // this.mostrarPaginas(this.buscador._indexador.paginasIndexadas);
-        // console.log(this.buscador._indexador.paginasIndexadas);
     }
 
     public menu() {
 
         let opcoes: string[] = ['Fazer busca', 'Sair'];
-        // terminal.clear();
-        
-        MyTerminal.titulo("Liv-Search");
 
-        // terminal.
+        MyTerminal.titulo("Liv-Search");
 
         terminal.singleColumnMenu(opcoes, {selectedStyle: terminal.bgGreen, leftPadding: '\t' }, (error: Error, response) => {
             if (error) {

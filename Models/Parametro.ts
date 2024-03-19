@@ -1,3 +1,5 @@
+//questao 5 sobre a persistencia dos dados
+//foi decidido armazenar em um arquivo de configuração, 
 export class Parametro {
     public static PontoReferencia: number = 20;
     public static pontoOcorrencia: number = 5;
