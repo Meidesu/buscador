@@ -54,6 +54,8 @@ class MyTerminal {
         terminal_kit_1.terminal.hideCursor(true);
     }
     static mostrarTabela(pags) {
+        terminal_kit_1.terminal.clear();
+        this.titulo("Tabela de Resultados");
         let data = [
             ['Título', 'Referecia', 'Frescor', 'Ocorrencia', 'Tags', 'Autoreferencia', 'Total']
         ];

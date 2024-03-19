@@ -53,6 +53,9 @@ export class MyTerminal {
     }    
 
     public static mostrarTabela(pags: Pagina[]): void{
+        terminal.clear();
+        this.titulo("Tabela de Resultados")
+
         let data: string[][] = [
             ['Título', 'Referecia', 'Frescor', 'Ocorrencia', 'Tags', 'Autoreferencia', 'Total' ]
 

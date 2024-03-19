@@ -60,6 +60,11 @@ export class App {
     
                         break;
                     case 1:
+
+                        terminal.grabInput(false);
+                        terminal.clear();
+                        console.log("Saindo...")
+                        terminal.hideCursor(false);
                         terminal.processExit(0);
                         break;
     

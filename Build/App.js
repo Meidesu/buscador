@@ -55,6 +55,10 @@ class App {
                         this.mostrarPaginas(pags, termoBusca);
                         break;
                     case 1:
+                        terminal_kit_1.terminal.grabInput(false);
+                        terminal_kit_1.terminal.clear();
+                        console.log("Saindo...");
+                        terminal_kit_1.terminal.hideCursor(false);
                         terminal_kit_1.terminal.processExit(0);
                         break;
                 }
