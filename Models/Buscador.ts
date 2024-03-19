@@ -11,18 +11,18 @@ export class Buscador {
         this._indexador = new Indexador();
     }
 
+    //ele inicia a indexação e calcula as pontuações estáticas de forma assíncrona
     public async InicarBuscador(): Promise<void> {
         await this._indexador._iniciarIndexacao();
 
         this._calcularReferencias();
         this._calcularFrescor();
-        
     } 
 
+    //busca o array de páginas já ranqueadas
     public buscar(termoPesquisado: string): Pagina[] {
          
         return this._ranquearPaginas(this.buscarOcorrencias(termoPesquisado));
-
     }
 
     buscarOcorrencias(consulta: string): Pagina[] {
@@ -41,6 +41,7 @@ export class Buscador {
             let _usotags: number = pagina.pontuacao.usoTags;
             let _ocorr: number = 0; 
 
+            // if que vai pegar o conteudo da head e do body e verificar se tem o termo pesquisado
             if (resHead) {
 
                 _ocorr += (resHead.match(regex) || []).length;
@@ -76,7 +77,8 @@ export class Buscador {
 
             pagina.pontuacao.usoTags = _usotags;
             pagina.pontuacao.freqTermo = _ocorr * Parametro.pontoOcorrencia;
-
+            
+            //só adiciona um array de páginas àquelas que tiverem ocorrências
             if (_ocorr > 0) {
                 paginasRetorno.push(pagina);
             }
@@ -120,7 +122,7 @@ export class Buscador {
         for (let pagina of this._indexador.paginasIndexadas) {
             
             for (let link of pagina.links) {
-
+                //encontrar a página pela url
                 let paginaReferenciada = this._indexador.paginasIndexadas.find(p => p.url === link);
 
                 if (paginaReferenciada) {
@@ -142,9 +144,6 @@ export class Buscador {
             let dataPagina = pagina.data;
             let pontuacao = Parametro.pontoFrescor;
 
-            // console.log(data);
-            // console.log(dataPagina);
-            
             // Se a pagina não tiver data, não será calculado o frescor
             if (!dataPagina) {
                 continue;
@@ -152,22 +151,8 @@ export class Buscador {
 
             let diferenca = data.getFullYear() - dataPagina.getFullYear();
 
-            // console.log('Diferença: ', diferenca);
-
             pontuacao -= diferenca * Parametro.penalizacaoAno;
             pagina.pontuacao.frescor = pontuacao;
         }
     }
 }
-
-// async function main() {
-//     const buscador: Buscador = new Buscador();
-
-//     await buscador.InicarBuscador();
-
-//     buscador.buscarOcorrencias('Matrix');
-    
-//     buscador._indexador.paginasIndexadas.forEach(p => console.log(p.titulo, p.pontuacao));
-// }
-
-// main()

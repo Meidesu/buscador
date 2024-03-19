@@ -1,30 +1,22 @@
+//bibliotecas utilizadas para o projeto
 import axios from 'axios';
 import { load } from 'cheerio';
 import fs from 'fs';
 import { Pagina } from './Pagina';
 
+//classe  indexador
 export class Indexador{
     private _paginasIndexadas: Pagina[];
-    private _urls: string[];
     private _index: string;
     
     constructor(index?: string){
         this._paginasIndexadas = [];
-        this._urls = [
-            'https://meidesu.github.io/movies-pages/interestelar.html',
-            'https://meidesu.github.io/movies-pages/mochileiro.html',
-            'https://meidesu.github.io/movies-pages/matrix.html',
-            'https://meidesu.github.io/movies-pages/duna.html',
-            'https://meidesu.github.io/movies-pages/blade_runner.html'
-        ];
-
         this._index = index || 'https://meidesu.github.io/movies-pages/interestelar.html';
     }
 
     public async _iniciarIndexacao(): Promise<void>{
         await this.indexar(this._index);
         console.log('Indexação concluída');
-        
     }
 
     public async indexar(url: string): Promise<void>{
@@ -35,7 +27,6 @@ export class Indexador{
         }       
 
         // Realizar a requisição GET para a URL especificada
-        
         const response = await axios.get(url);
         
         // Extrair os dados da resposta
@@ -44,18 +35,19 @@ export class Indexador{
         // Carregar o HTML da resposta usando cheerio
         const $ = load(conteudo);
         
-        // Obter o título da página, porem eu só quero duas palavras do título separadas por _ (underline)  
+        // Obter o título da página, porem eu só quero duas palavras do título separadas por _ 
         const titulo = $('title').text();
 
         // Extrai a data da pagna e transforma num tipo date
         const emElement = $('p').text();
         const regex = /\d{2}\/\d{2}\/\d{4}/;
 
+        //obs: regex é uma expressão regular de acordo com os parametros estabelicidos
         const match = emElement.match(regex);
         const dataPag = match ? match[0] : null;
 
         let data: Date | null;
-        
+        //verifica se a data é válida e cria uma nova data a partir dela
         if(dataPag){
             const [dia, mes, ano] = dataPag.split('/').map(Number);
             data = new Date(ano, mes - 1, dia);
@@ -78,11 +70,12 @@ export class Indexador{
                 links.push(href);
             }
         }
-
+        //cria uma nova página de acordo com os parametros passados e salva o arquivo
         this._paginasIndexadas.push(new Pagina(titulo, url, conteudo, data, links));
         
         this._salvarArquivo(titulo, conteudo);
 
+        // Indexar as páginas encontradas
         for (let link of links){
             if(this._indexado(link)){
                 
@@ -101,7 +94,6 @@ export class Indexador{
         } catch (error) {
             throw new Error('Erro ao salvar o arquivo');
         }
-
     }
 
     // Metodo que verifica se a URL já foi indexada

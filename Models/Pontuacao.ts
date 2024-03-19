@@ -1,3 +1,4 @@
+//classe pontuação
 export class Pontuacao {
     // private _autoridade: {freqTermo: number, usoTags: number, autoReferencia: number, frescor: number};
     private _freqTermo: number;
@@ -13,7 +14,7 @@ export class Pontuacao {
         this._frescor = frescor;
         this._referencia = 0;
     }
-
+    //getters e setters
     get freqTermo(): number {
         return this._freqTermo;
     }

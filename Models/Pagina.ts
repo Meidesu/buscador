@@ -1,6 +1,6 @@
 import { Pontuacao } from "./Pontuacao";
 
-export class Pagina {
+export class Pagina { //classe onde ficarão os atributos e métodos de página
     //url: string, conteudo: string, autoridade: number 
     private _titulo: string;
     private _url: string;
@@ -17,7 +17,7 @@ export class Pagina {
         this._links = links;
         this._data = data;
     }
-
+    //getters e setters
     get titulo(): string {
         return this._titulo;
     }
