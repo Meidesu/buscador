@@ -99,18 +99,15 @@ export class App {
             if (error) {
                 console.error("Erro ao exibir menu:", error);
                 return;
-            }
+            }          
 
-            // Processar a seleção do usuário
             if (response.selectedIndex == 0){
                 MyTerminal.mostrarTabela(pags);
                 this.menu();
                 return;
             }
 
-            let pagSelecionada: Pagina = pags[response.selectedIndex];
-
-            MyTerminal.displayHTML(pags[response.selectedIndex].conteudo);
+            MyTerminal.displayHTML(pags[response.selectedIndex - 1].conteudo);
 
             // Exibir o menu novamente
             this.menu();

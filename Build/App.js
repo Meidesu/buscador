@@ -87,14 +87,12 @@ class App {
                 console.error("Erro ao exibir menu:", error);
                 return;
             }
-            // Processar a seleção do usuário
             if (response.selectedIndex == 0) {
                 MyTerminal_1.MyTerminal.mostrarTabela(pags);
                 this.menu();
                 return;
             }
-            let pagSelecionada = pags[response.selectedIndex];
-            MyTerminal_1.MyTerminal.displayHTML(pags[response.selectedIndex].conteudo);
+            MyTerminal_1.MyTerminal.displayHTML(pags[response.selectedIndex - 1].conteudo);
             // Exibir o menu novamente
             this.menu();
         }));
