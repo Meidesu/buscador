@@ -53,4 +53,13 @@ export class Pontuacao {
     set referencia(referencia: number) {
         this._referencia = referencia;
     }
-}
+    
+    get total(): number {
+        return this._freqTermo + this._usoTags - this._autoReferencia + this._frescor + this._referencia;
+    }
+
+    public reset(): void {
+        this._freqTermo = 0;
+        this._usoTags = 0;
+    }
+}    

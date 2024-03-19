@@ -39,5 +39,12 @@ class Pontuacao {
     set referencia(referencia) {
         this._referencia = referencia;
     }
+    get total() {
+        return this._freqTermo + this._usoTags - this._autoReferencia + this._frescor + this._referencia;
+    }
+    reset() {
+        this._freqTermo = 0;
+        this._usoTags = 0;
+    }
 }
 exports.Pontuacao = Pontuacao;

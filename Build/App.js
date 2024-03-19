@@ -1,10 +1,19 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.App = void 0;
 const terminal_kit_1 = require("terminal-kit");
 const Buscador_1 = require("./Models/Buscador");
 const MyTerminal_1 = require("./Utils/MyTerminal");
-const readline_sync_1 = require("readline-sync");
+const io_utils_1 = require("./Utils/io_utils");
 // import  from "terminal-kit";
 // import { terminal as Terminal } from "terminal-kit";
 // import T from "terminal-kit";
@@ -17,63 +26,85 @@ class App {
         this.buscador = new Buscador_1.Buscador();
     }
     main() {
-        this.buscador.InicarBuscador();
-        this.sein();
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.buscador.InicarBuscador();
+            MyTerminal_1.MyTerminal.exit();
+            terminal_kit_1.terminal.clear();
+            this.menu();
+            // this.mostrarPaginas(this.buscador._indexador.paginasIndexadas);
+            // console.log(this.buscador._indexador.paginasIndexadas);
+        });
     }
-    sein() {
-        let opcoes = ['Fazer busca', 'Alterar Parametros', 'Sair'];
-        terminal_kit_1.terminal.singleColumnMenu(opcoes, (error, response) => {
+    menu() {
+        let opcoes = ['Fazer busca', 'Sair'];
+        // terminal.clear();
+        MyTerminal_1.MyTerminal.titulo("Liv-Search");
+        // terminal.
+        terminal_kit_1.terminal.singleColumnMenu(opcoes, { selectedStyle: terminal_kit_1.terminal.bgGreen, leftPadding: '\t' }, (error, response) => {
             if (error) {
                 console.error("Erro ao exibir menu:", error.message);
                 return;
             }
-            switch (response.selectedIndex) {
-                case 0:
-                    terminal_kit_1.terminal.grabInput(false);
-                    let termoBusca = (0, readline_sync_1.question)("Digite o termo de busca: ");
-                    let pags = this.buscador.buscar(termoBusca);
-                    if (!pags) {
-                        console.log("OXENTE TA VAZIO SAPOHA");
-                        return;
-                    }
-                    this.mostrarPaginas(pags);
-                    break;
-                case 1:
-                    // this.alterarParametros();
-                    break;
-                case 2:
-                    terminal_kit_1.terminal.processExit(0);
-                    break;
+            try {
+                switch (response.selectedIndex) {
+                    case 0:
+                        terminal_kit_1.terminal.clear();
+                        let termoBusca = io_utils_1.ioutils.input("Digite o termo de busca: ").trim();
+                        let pags = this.buscador.buscar(termoBusca);
+                        terminal_kit_1.terminal.grabInput(true);
+                        this.mostrarPaginas(pags, termoBusca);
+                        break;
+                    case 1:
+                        terminal_kit_1.terminal.processExit(0);
+                        break;
+                }
             }
-            this.sein();
+            catch (error) {
+                console.error(error.message);
+                io_utils_1.ioutils.continuar();
+                this.menu();
+            }
         });
     }
     // Função para exibir o menu e processar a seleção do usuário
-    mostrarPaginas(pags) {
+    mostrarPaginas(pags, termoBusca) {
         let titulos = [];
+        titulos.push("Mostar tabela de pontuação");
+        // Verificar se há páginas para exibir
+        if (pags.length == 0) {
+            throw new Error(`\nNenhuma página encontrada para o termo: ${termoBusca}`);
+        }
+        // Separar os títulos das páginas
         pags.forEach(p => {
             titulos.push(p.titulo);
         });
+        // Limpar o terminal e exibir o título
         terminal_kit_1.terminal.clear();
-        terminal_kit_1.terminal.singleColumnMenu(titulos, (error, response) => {
+        MyTerminal_1.MyTerminal.titulo(`Páginas encontradas para o termo: ${termoBusca}`);
+        // Exibir o menu
+        terminal_kit_1.terminal.singleColumnMenu(titulos, { selectedStyle: terminal_kit_1.terminal.bgGreen, leftPadding: '\t' }, (error, response) => __awaiter(this, void 0, void 0, function* () {
             if (error) {
                 console.error("Erro ao exibir menu:", error);
                 return;
             }
             // Processar a seleção do usuário
+            if (response.selectedIndex == 0) {
+                MyTerminal_1.MyTerminal.mostrarTabela(pags);
+                this.menu();
+                return;
+            }
+            let pagSelecionada = pags[response.selectedIndex];
             MyTerminal_1.MyTerminal.displayHTML(pags[response.selectedIndex].conteudo);
-            // MyTerminal.continuar();
-            // terminal.grabInput(false);
-            // terminal.processExit(0);
-            // Exibir o menu novamente após a seleção do usuário
-            // this.mostrarPaginas(pags);
-        });
+            // Exibir o menu novamente
+            this.menu();
+        }));
     }
 }
 exports.App = App;
-// cu
 function main() {
-    const app = new App();
-    app.main();
+    return __awaiter(this, void 0, void 0, function* () {
+        const app = new App();
+        yield app.main();
+    });
 }
 main();

@@ -41,4 +41,8 @@ export class Pagina {
     get data(): Date | null {
         return this._data;
     }
+
+    public resetarPontuacao(): void {
+        this._pontuacao.reset();
+    }
 }

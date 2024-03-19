@@ -30,5 +30,8 @@ class Pagina {
     get data() {
         return this._data;
     }
+    resetarPontuacao() {
+        this._pontuacao.reset();
+    }
 }
 exports.Pagina = Pagina;
