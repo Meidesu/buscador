@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Pontuacao = void 0;
+//classe pontuação
 class Pontuacao {
     constructor(freqTermo = 0, usoTags = 0, autoReferencia = 0, frescor = 0) {
         this._freqTermo = freqTermo;
@@ -9,6 +10,7 @@ class Pontuacao {
         this._frescor = frescor;
         this._referencia = 0;
     }
+    //getters e setters
     get freqTermo() {
         return this._freqTermo;
     }

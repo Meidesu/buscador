@@ -8,7 +8,7 @@ export class Buscador {
     public _paginasRetorno: Pagina[] = [];
 
     constructor() {
-        this._indexador = new Indexador();
+        this._indexador = new Indexador("https://g1.globo.com/pi/piaui/", 2);
     }
 
     //ele inicia a indexação e calcula as pontuações estáticas de forma assíncrona

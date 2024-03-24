@@ -16,8 +16,9 @@ const Parametro_1 = require("./Parametro");
 class Buscador {
     constructor() {
         this._paginasRetorno = [];
-        this._indexador = new Indexador_1.Indexador();
+        this._indexador = new Indexador_1.Indexador("https://g1.globo.com/pi/piaui/", 2);
     }
+    //ele inicia a indexação e calcula as pontuações estáticas de forma assíncrona
     InicarBuscador() {
         return __awaiter(this, void 0, void 0, function* () {
             yield this._indexador._iniciarIndexacao();
@@ -25,6 +26,7 @@ class Buscador {
             this._calcularFrescor();
         });
     }
+    //busca o array de páginas já ranqueadas
     buscar(termoPesquisado) {
         return this._ranquearPaginas(this.buscarOcorrencias(termoPesquisado));
     }
@@ -39,6 +41,7 @@ class Buscador {
             const resBody = $('body').text();
             let _usotags = pagina.pontuacao.usoTags;
             let _ocorr = 0;
+            // if que vai pegar o conteudo da head e do body e verificar se tem o termo pesquisado
             if (resHead) {
                 _ocorr += (resHead.match(regex) || []).length;
                 _usotags += (resHead.match(regex) || []).length * Parametro_1.Parametro.pontoTags.head;
@@ -67,6 +70,7 @@ class Buscador {
             }
             pagina.pontuacao.usoTags = _usotags;
             pagina.pontuacao.freqTermo = _ocorr * Parametro_1.Parametro.pontoOcorrencia;
+            //só adiciona um array de páginas àquelas que tiverem ocorrências
             if (_ocorr > 0) {
                 paginasRetorno.push(pagina);
             }
@@ -109,6 +113,7 @@ class Buscador {
     _calcularReferencias() {
         for (let pagina of this._indexador.paginasIndexadas) {
             for (let link of pagina.links) {
+                //encontrar a página pela url
                 let paginaReferenciada = this._indexador.paginasIndexadas.find(p => p.url === link);
                 if (paginaReferenciada) {
                     if (paginaReferenciada.url == pagina.url) {
@@ -126,24 +131,14 @@ class Buscador {
             let data = new Date();
             let dataPagina = pagina.data;
             let pontuacao = Parametro_1.Parametro.pontoFrescor;
-            // console.log(data);
-            // console.log(dataPagina);
             // Se a pagina não tiver data, não será calculado o frescor
             if (!dataPagina) {
                 continue;
             }
             let diferenca = data.getFullYear() - dataPagina.getFullYear();
-            // console.log('Diferença: ', diferenca);
             pontuacao -= diferenca * Parametro_1.Parametro.penalizacaoAno;
             pagina.pontuacao.frescor = pontuacao;
         }
     }
 }
 exports.Buscador = Buscador;
-// async function main() {
-//     const buscador: Buscador = new Buscador();
-//     await buscador.InicarBuscador();
-//     buscador.buscarOcorrencias('Matrix');
-//     buscador._indexador.paginasIndexadas.forEach(p => console.log(p.titulo, p.pontuacao));
-// }
-// main()

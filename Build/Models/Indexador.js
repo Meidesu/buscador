@@ -13,21 +13,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Indexador = void 0;
+//bibliotecas utilizadas para o projeto
 const axios_1 = __importDefault(require("axios"));
 const cheerio_1 = require("cheerio");
 const fs_1 = __importDefault(require("fs"));
 const Pagina_1 = require("./Pagina");
+//classe  indexador
 class Indexador {
-    constructor(index) {
+    constructor(index, profMax) {
         this._paginasIndexadas = [];
-        this._urls = [
-            'https://meidesu.github.io/movies-pages/interestelar.html',
-            'https://meidesu.github.io/movies-pages/mochileiro.html',
-            'https://meidesu.github.io/movies-pages/matrix.html',
-            'https://meidesu.github.io/movies-pages/duna.html',
-            'https://meidesu.github.io/movies-pages/blade_runner.html'
-        ];
         this._index = index || 'https://meidesu.github.io/movies-pages/interestelar.html';
+        this._ProfMax = profMax || 2;
     }
     _iniciarIndexacao() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -35,26 +31,33 @@ class Indexador {
             console.log('Indexação concluída');
         });
     }
-    indexar(url) {
+    indexar(url, prof = 0) {
         return __awaiter(this, void 0, void 0, function* () {
+            // verifica se a url ja foi indexada
+            let profAtual = prof;
             if (this._indexado(url)) {
-                // throw new Error('URL já indexada');
                 console.log('URL já indexada');
                 return;
             }
-            // Realizar a requisição GET para a URL especificada
+            // Verifica se o link pertence a mesma página
+            if (!url.startsWith(this._index)) {
+                console.log('Link não pertence a mesma página');
+                return;
+            }
+            // faz a requisição
             const response = yield axios_1.default.get(url);
-            // Extrair os dados da resposta
+            // extrai o conteudo da pagina
             const conteudo = response.data;
-            // Carregar o HTML da resposta usando cheerio
+            // carrega o conteudo html
             const $ = (0, cheerio_1.load)(conteudo);
-            // Obter o título da página, porem eu só quero duas palavras do título separadas por _ (underline)  
+            // obtem o titulo da pagina
             const titulo = $('title').text();
-            // Extrai a data da pagna e transforma num tipo date
+            // extrai a data da pagina
             const emElement = $('p').text();
             const regex = /\d{2}\/\d{2}\/\d{4}/;
             const match = emElement.match(regex);
             const dataPag = match ? match[0] : null;
+            // verifica a data da pagina(se ela é válida)
             let data;
             if (dataPag) {
                 const [dia, mes, ano] = dataPag.split('/').map(Number);
@@ -63,30 +66,38 @@ class Indexador {
             else {
                 data = null;
             }
-            // Obter tags <a> 
+            // obtem as paginas da tag <a>
             const tagsA = $('a');
-            // Links de cada página
             const links = [];
-            // Adicionar os links ao array de links
             for (let tag of tagsA) {
                 const href = $(tag).attr("href");
                 if (href) {
                     links.push(href);
                 }
             }
+            try {
+                this._salvarArquivo(titulo, conteudo);
+            }
+            catch (e) {
+                console.log(e.message);
+            }
+            console.log(`Indexando ${titulo}`);
+            // cria uma instancia e add ela na lista de paginas indexadas
             this._paginasIndexadas.push(new Pagina_1.Pagina(titulo, url, conteudo, data, links));
-            this._salvarArquivo(titulo, conteudo);
-            for (let link of links) {
-                if (this._indexado(link)) {
-                    continue;
+            // Verifica se a página atual está indexada
+            if (this._indexado(url) && profAtual < this._ProfMax) {
+                // Limita a indexação apenas aos links da página
+                for (let link of links) {
+                    // console.log(`Indexando ${link}`);
+                    yield this.indexar(link, profAtual + 1);
                 }
-                yield this.indexar(link);
             }
         });
     }
     _salvarArquivo(titulo, conteudo) {
-        let _nomeArquivo = titulo.split(' ').slice(0, 2).join('_');
+        let _nomeArquivo = titulo.split(' ').slice(0, 4).join('_');
         try {
+            console.log(`Salvando arquivo ${_nomeArquivo}`);
             fs_1.default.writeFileSync(`../Pages/${_nomeArquivo}.html`, conteudo);
         }
         catch (error) {

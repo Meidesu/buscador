@@ -12,6 +12,7 @@ class Pagina {
         this._links = links;
         this._data = data;
     }
+    //getters e setters
     get titulo() {
         return this._titulo;
     }

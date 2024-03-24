@@ -14,13 +14,7 @@ const terminal_kit_1 = require("terminal-kit");
 const Buscador_1 = require("./Models/Buscador");
 const MyTerminal_1 = require("./Utils/MyTerminal");
 const io_utils_1 = require("./Utils/io_utils");
-// import  from "terminal-kit";
-// import { terminal as Terminal } from "terminal-kit";
-// import T from "terminal-kit";
-// import { singleColumnMenu } from "terminal-kit";
-// import { grabInput } from "terminal-kit";
 class App {
-    // private terminal = Terminal;
     constructor() {
         this.menuOptions = ["Opção 1", "Opção 2", "Opção 3", "Sair"];
         this.buscador = new Buscador_1.Buscador();
@@ -31,15 +25,11 @@ class App {
             MyTerminal_1.MyTerminal.exit();
             terminal_kit_1.terminal.clear();
             this.menu();
-            // this.mostrarPaginas(this.buscador._indexador.paginasIndexadas);
-            // console.log(this.buscador._indexador.paginasIndexadas);
         });
     }
     menu() {
         let opcoes = ['Fazer busca', 'Sair'];
-        // terminal.clear();
         MyTerminal_1.MyTerminal.titulo("Liv-Search");
-        // terminal.
         terminal_kit_1.terminal.singleColumnMenu(opcoes, { selectedStyle: terminal_kit_1.terminal.bgGreen, leftPadding: '\t' }, (error, response) => {
             if (error) {
                 console.error("Erro ao exibir menu:", error.message);

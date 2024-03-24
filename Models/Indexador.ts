@@ -8,10 +8,12 @@ import { Pagina } from './Pagina';
 export class Indexador{
     private _paginasIndexadas: Pagina[];
     private _index: string;
+    private _ProfMax: number;
     
-    constructor(index?: string){
+    constructor(index?: string, profMax?: number){
         this._paginasIndexadas = [];
         this._index = index || 'https://meidesu.github.io/movies-pages/interestelar.html';
+        this._ProfMax = profMax || 2;
     }
 
     public async _iniciarIndexacao(): Promise<void>{
@@ -19,77 +21,87 @@ export class Indexador{
         console.log('Indexação concluída');
     }
 
-    public async indexar(url: string): Promise<void>{
+    public async indexar(url: string, prof: number = 0): Promise<void>{
+        // verifica se a url ja foi indexada
+        let profAtual = prof;
+
         if(this._indexado(url)){
-            // throw new Error('URL já indexada');
             console.log('URL já indexada');
             return;
-        }       
+        } 
 
-        // Realizar a requisição GET para a URL especificada
+        // Verifica se o link pertence a mesma página
+        if(!url.startsWith(this._index)){
+            console.log('Link não pertence a mesma página');
+            return;
+        }
+
+        // faz a requisição
         const response = await axios.get(url);
-        
-        // Extrair os dados da resposta
+        // extrai o conteudo da pagina
         const conteudo: string = response.data;
-        
-        // Carregar o HTML da resposta usando cheerio
+        // carrega o conteudo html
         const $ = load(conteudo);
-        
-        // Obter o título da página, porem eu só quero duas palavras do título separadas por _ 
+        // obtem o titulo da pagina
         const titulo = $('title').text();
-
-        // Extrai a data da pagna e transforma num tipo date
+        // extrai a data da pagina
         const emElement = $('p').text();
         const regex = /\d{2}\/\d{2}\/\d{4}/;
-
-        //obs: regex é uma expressão regular de acordo com os parametros estabelicidos
         const match = emElement.match(regex);
         const dataPag = match ? match[0] : null;
-
+        
+        // verifica a data da pagina(se ela é válida)
         let data: Date | null;
-        //verifica se a data é válida e cria uma nova data a partir dela
         if(dataPag){
             const [dia, mes, ano] = dataPag.split('/').map(Number);
             data = new Date(ano, mes - 1, dia);
         } else {
             data = null;
         }        
-
-        // Obter tags <a> 
-        const tagsA = $('a');
-
-        // Links de cada página
-        const links: string[] = [];
         
-        // Adicionar os links ao array de links
+        // obtem as paginas da tag <a>
+        const tagsA = $('a');
+        const links: string[] = [];
+    
         for ( let tag of tagsA){
             const href = $(tag).attr("href");
-
             if(href){
-
                 links.push(href);
             }
         }
-        //cria uma nova página de acordo com os parametros passados e salva o arquivo
-        this._paginasIndexadas.push(new Pagina(titulo, url, conteudo, data, links));
+
+        try{
+            this._salvarArquivo(titulo, conteudo);
+
+        } catch (e: any){
+            console.log(e.message);
+        }
         
-        this._salvarArquivo(titulo, conteudo);
+        console.log(`Indexando ${titulo}`);
+        
+        // cria uma instancia e add ela na lista de paginas indexadas
+        this._paginasIndexadas.push(new Pagina(titulo, url, conteudo, data, links));
 
-        // Indexar as páginas encontradas
-        for (let link of links){
-            if(this._indexado(link)){
+    
+        // Verifica se a página atual está indexada
+        if(this._indexado(url) && profAtual < this._ProfMax){
+            // Limita a indexação apenas aos links da página
+
+            for (let link of links){
+                // console.log(`Indexando ${link}`);
                 
-                continue;
+                await this.indexar(link, profAtual + 1);
             }
-
-            await this.indexar(link);
-        }        
+        }
     }
+    
 
     private _salvarArquivo(titulo: string, conteudo: string) {
-        let _nomeArquivo: string = titulo.split(' ').slice(0, 2).join('_');
+        let _nomeArquivo: string = titulo.split(' ').slice(0, 4).join('_');
         
         try{
+            console.log(`Salvando arquivo ${_nomeArquivo}`);
+            
             fs.writeFileSync(`../Pages/${_nomeArquivo}.html`, conteudo);
         } catch (error) {
             throw new Error('Erro ao salvar o arquivo');

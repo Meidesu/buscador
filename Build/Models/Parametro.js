@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Parametro = void 0;
+//questao 5 sobre a persistencia dos dados
+//foi decidido armazenar em um arquivo de configuração, 
 class Parametro {
 }
 exports.Parametro = Parametro;
