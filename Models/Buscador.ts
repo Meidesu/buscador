@@ -151,7 +151,12 @@ export class Buscador {
 
             let diferenca = data.getFullYear() - dataPagina.getFullYear();
 
-            pontuacao -= diferenca * Parametro.penalizacaoAno;
+            if(diferenca === 0 || diferenca === 1){
+                pontuacao -= diferenca * Parametro.penalizacaoAno;
+            }
+            else{
+                pontuacao -= (diferenca - 1) * Parametro.penalizacaoAno;
+            }
             pagina.pontuacao.frescor = pontuacao;
         }
     }
