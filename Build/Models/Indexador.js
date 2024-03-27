@@ -20,10 +20,10 @@ const fs_1 = __importDefault(require("fs"));
 const Pagina_1 = require("./Pagina");
 //classe  indexador
 class Indexador {
-    constructor(index, profMax) {
+    constructor(profMax, index) {
         this._paginasIndexadas = [];
         this._index = index || 'https://meidesu.github.io/movies-pages/interestelar.html';
-        this._ProfMax = profMax || 2;
+        this._ProfMax = profMax || 3;
     }
     _iniciarIndexacao() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -40,10 +40,10 @@ class Indexador {
                 return;
             }
             // Verifica se o link pertence a mesma página
-            if (!url.startsWith(this._index)) {
-                console.log('Link não pertence a mesma página');
-                return;
-            }
+            // if(!url.startsWith(this._index)){
+            //     console.log('Link não pertence a mesma página');
+            //     return;
+            // }
             // faz a requisição
             const response = yield axios_1.default.get(url);
             // extrai o conteudo da pagina

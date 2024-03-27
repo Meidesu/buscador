@@ -16,7 +16,8 @@ const Parametro_1 = require("./Parametro");
 class Buscador {
     constructor() {
         this._paginasRetorno = [];
-        this._indexador = new Indexador_1.Indexador("https://g1.globo.com/pi/piaui/", 2);
+        // "https://g1.globo.com/pi/piaui/"
+        this._indexador = new Indexador_1.Indexador(3);
     }
     //ele inicia a indexação e calcula as pontuações estáticas de forma assíncrona
     InicarBuscador() {
