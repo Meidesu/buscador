@@ -10,10 +10,10 @@ export class Indexador{
     private _index: string;
     private _ProfMax: number;
     
-    constructor(index?: string, profMax?: number){
+    constructor(profMax?: number, index?: string ){
         this._paginasIndexadas = [];
         this._index = index || 'https://meidesu.github.io/movies-pages/interestelar.html';
-        this._ProfMax = profMax || 2;
+        this._ProfMax = profMax || 3;
     }
 
     public async _iniciarIndexacao(): Promise<void>{
@@ -31,10 +31,10 @@ export class Indexador{
         } 
 
         // Verifica se o link pertence a mesma página
-        if(!url.startsWith(this._index)){
-            console.log('Link não pertence a mesma página');
-            return;
-        }
+        // if(!url.startsWith(this._index)){
+        //     console.log('Link não pertence a mesma página');
+        //     return;
+        // }
 
         // faz a requisição
         const response = await axios.get(url);
