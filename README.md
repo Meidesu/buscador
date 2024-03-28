@@ -12,3 +12,6 @@ Instruções:
    npm install cheerio
 2. Para importar o módulo 'axios', você tambem pode instalar usando npm:
    npm install axios
+3. Para usar o módulo fs (File System) em um projeto Node.js, você não precisa instalá-lo separadamente, pois ele é um módulo nativo do Node.js e está disponível por padrão.
+
+
