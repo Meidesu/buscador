@@ -17,6 +17,10 @@ Instruções:
    npm install terminal-kit
 5. Para importar a função parse do pacote node-html-parser você pode instalar usando npm:
    npm install node-html-parser
+6. Para importar as funções keyIn e question do pacote readline-sync você pode instalar pelo npm:
+   npm install readline-sync
+
+   
 
 
    
